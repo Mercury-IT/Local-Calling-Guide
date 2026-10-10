@@ -1,75 +1,62 @@
-name: Build and Deploy to Azure Web App
+name: Build and deploy ASP.Net Core app to Azure Web App - LCG-Rate-Center
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
-
-env:
-  DOTNET_VERSION: '10.0.x'
-  AZURE_WEBAPP_NAME: lcg-rate-center          # change this to your App Service name
-  AZURE_WEBAPP_PACKAGE_PATH: './publish'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    permissions:
+      contents: read
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
 
-    - name: Restore
-      run: dotnet restore WebApplication3.sln
+      - name: Restore
+        run: dotnet restore WebApplication3.sln
 
-    - name: Build
-      run: dotnet build WebApplication3.sln --configuration Release --no-restore
+      - name: Build
+        run: dotnet build WebApplication3.sln --configuration Release --no-restore
 
-    - name: Test
-      run: dotnet test WebApplication3.Tests/WebApplication3.Tests.csproj --configuration Release --no-build --verbosity normal
+      - name: Publish
+        run: dotnet publish WebApplication3/WebApplication3.csproj -c Release -o ./publish --no-restore
 
-    - name: Publish
-      run: |
-        dotnet publish WebApplication3/WebApplication3.csproj \
-          --configuration Release \
-          --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} \
-          --no-restore
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish
 
   deploy:
-    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
     needs: build
-    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
 
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: webapp
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ./publish
 
-    - name: Login to Azure
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'LCG-Rate-Center'
+          package: ./publish
