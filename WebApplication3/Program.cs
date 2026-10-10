@@ -11,7 +11,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddHttpClient<ILocalCallingGuideService, LocalCallingGuideService>(httpClient =>
 {
     httpClient.BaseAddress = new Uri(localCallingGuideBaseUrl);
-    httpClient.Timeout = TimeSpan.FromSeconds(10);
+    httpClient.Timeout = TimeSpan.FromMinutes(5);
 });
 
 var app = builder.Build();
@@ -30,6 +30,13 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+// Force all unknown routes to the main lookup page
+app.MapFallback(context =>
+{
+    context.Response.Redirect("/");
+    return Task.CompletedTask;
+});
 
 app.MapControllerRoute(
     name: "default",

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ public sealed class LocalCallingGuideService(
     HttpClient httpClient,
     ILogger<LocalCallingGuideService> logger) : ILocalCallingGuideService
 {
-    private const int MaximumConcurrentLookups = 5;
+    private const int MaximumConcurrentLookups = 10;
 
     public async Task<IReadOnlyDictionary<string, PrefixLookupResult>> LookupAsync(
         IReadOnlyCollection<PhonePrefix> prefixes,
@@ -42,12 +43,16 @@ public sealed class LocalCallingGuideService(
             using var response = await httpClient.GetAsync(path, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            using var reader = XmlReader.Create(stream, new XmlReaderSettings
+            var xml = await response.Content.ReadAsStringAsync(cancellationToken);
+            // Strip the large DOCTYPE that Local Calling Guide includes
+            xml = StripDoctype(xml);
+
+            using var reader = XmlReader.Create(new StringReader(xml), new XmlReaderSettings
             {
-                DtdProcessing = DtdProcessing.Prohibit,
+                DtdProcessing = DtdProcessing.Ignore,
                 XmlResolver = null
             });
+
             var document = (LocalCallingGuideResponse?)new XmlSerializer(typeof(LocalCallingGuideResponse))
                 .Deserialize(reader);
 
@@ -68,6 +73,23 @@ public sealed class LocalCallingGuideService(
             logger.LogWarning(exception, "Rate center lookup failed for prefix {Prefix}.", prefix.Key);
             return new PrefixLookupResult(null, "The lookup service is temporarily unavailable. Please try again.");
         }
+    }
+
+    private static string StripDoctype(string xml)
+    {
+        var doctypeStart = xml.IndexOf("<!DOCTYPE", StringComparison.OrdinalIgnoreCase);
+        if (doctypeStart < 0)
+        {
+            return xml;
+        }
+
+        var rootStart = xml.IndexOf("<root>", doctypeStart, StringComparison.OrdinalIgnoreCase);
+        if (rootStart < 0)
+        {
+            return xml;
+        }
+
+        return xml[..doctypeStart] + xml[rootStart..];
     }
 }
 

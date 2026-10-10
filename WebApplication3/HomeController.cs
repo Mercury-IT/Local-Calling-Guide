@@ -38,7 +38,7 @@ namespace WebApplication3
 
             if (PhoneNumberParser.ExceedsMaximumNumbers(entries.Count))
             {
-                ModelState.AddModelError(string.Empty, "Search up to 25 numbers at a time.");
+                ModelState.AddModelError(string.Empty, "Search up to 15,000 numbers at a time.");
                 return View(model);
             }
 

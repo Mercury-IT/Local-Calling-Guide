@@ -5,7 +5,7 @@ namespace WebApplication3.Models;
 public sealed class LookupViewModel
 {
     [Required(ErrorMessage = "Enter at least one phone number or NPA-NXX.")]
-    [StringLength(2000, ErrorMessage = "Enter no more than 2,000 characters.")]
+    [StringLength(500000, ErrorMessage = "Enter no more than 500,000 characters.")]
     [Display(Name = "Phone numbers or NPA-NXX prefixes")]
     public string Numbers { get; set; } = string.Empty;
 

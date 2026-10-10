@@ -5,7 +5,7 @@ namespace WebApplication3.Services;
 
 public static partial class PhoneNumberParser
 {
-    private const int MaximumNumbers = 25;
+    private const int MaximumNumbers = 15000;
 
     public static IReadOnlyList<string> SplitNumbers(string input) =>
         NumberSeparators().Split(input)
