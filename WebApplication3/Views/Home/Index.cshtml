@@ -51,18 +51,7 @@
                 <h2>Rate center matches</h2>
             </div>
             <span class="result-count">@foundCount of @Model.Results.Count found</span>
-            <form asp-controller="Home" asp-action="Export" method="post" style="display:inline;">
-                @Html.AntiForgeryToken()
-                @for (var i = 0; i < Model.Results.Count; i++)
-                {
-                    <input type="hidden" name="Results[@i].Number" value="@Model.Results[i].Number" />
-                    <input type="hidden" name="Results[@i].Prefix.Npa" value="@Model.Results[i].Prefix.Npa" />
-                    <input type="hidden" name="Results[@i].Prefix.Nxx" value="@Model.Results[i].Prefix.Nxx" />
-                    <input type="hidden" name="Results[@i].RateCenter" value="@Model.Results[i].RateCenter" />
-                    <input type="hidden" name="Results[@i].ErrorMessage" value="@Model.Results[i].ErrorMessage" />
-                }
-                <button type="submit" class="btn btn-export">Download Excel</button>
-            </form>
+            <button type="button" class="btn btn-export" id="export-btn">Download CSV</button>
         </div>
         <div class="results-card">
             <div class="table-responsive">
@@ -100,4 +89,29 @@
             </div>
         </div>
     </section>
+
+    <script>
+        document.getElementById('export-btn')?.addEventListener('click', function () {
+            const rows = [['Phone Number', 'NPA-NXX', 'Rate Center', 'Status']];
+            document.querySelectorAll('.results-table tbody tr').forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                const number = cells[0]?.textContent?.trim() || '';
+                const prefix = cells[1]?.textContent?.trim() || '';
+                const rateCell = cells[2];
+                const hasError = rateCell?.querySelector('.lookup-error');
+                const rateCenter = hasError ? '' : (rateCell?.textContent?.trim() || '');
+                const status = hasError ? (hasError.textContent?.trim() || 'Not found') : 'Found';
+                rows.push([number, prefix, rateCenter, status]);
+            });
+
+            const csv = rows.map(r => r.map(c => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'RateCenters-' + new Date().toISOString().slice(0,19).replace(/[:T]/g, '-') + '.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
 }
