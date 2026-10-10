@@ -1,0 +1,89 @@
+@model WebApplication3.Models.LookupViewModel
+@{
+    ViewData["Title"] = "Rate center lookup";
+}
+
+<section class="hero">
+    <div class="hero-kicker">
+        <span class="status-dot"></span>
+        LOCAL CALLING GUIDE
+    </div>
+    <h1>Find the rate center<br />behind a number.</h1>
+    <p class="hero-copy">Look up one number or a whole list. We’ll match each phone number to its NPA-NXX and rate center.</p>
+</section>
+
+<section class="lookup-card" aria-labelledby="lookup-title">
+    <div class="card-heading">
+        <div>
+            <div class="eyebrow">PREFIX LOOKUP</div>
+            <h2 id="lookup-title">Start a search</h2>
+        </div>
+        <span class="limit-badge">Up to 25 at a time</span>
+    </div>
+
+    <form asp-controller="Home" asp-action="Index" method="post" id="lookup-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+        <label asp-for="Numbers" class="form-label"></label>
+        <textarea asp-for="Numbers" class="form-control number-input" rows="5"
+                  placeholder="212-555-1234&#10;415-555-6789&#10;or 212-555"
+                  aria-describedby="number-help"></textarea>
+        <span asp-validation-for="Numbers" class="field-error"></span>
+        <div id="number-help" class="input-hint">
+            Enter 6-digit NPA-NXX prefixes or 10-digit phone numbers. Separate entries with a new line, comma, semicolon, or |.
+        </div>
+        <button class="btn btn-search" type="submit" id="search-btn">
+            <span class="btn-label">Search rate centers</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+    </form>
+</section>
+
+@if (Model.Results.Count > 0)
+{
+    var foundCount = Model.Results.Count(result => result.HasRateCenter);
+    <section class="results-section" aria-live="polite">
+        <div class="results-heading">
+            <div>
+                <div class="eyebrow">YOUR RESULTS</div>
+                <h2>Rate center matches</h2>
+            </div>
+            <span class="result-count">@foundCount of @Model.Results.Count found</span>
+        </div>
+        <div class="results-card">
+            <div class="table-responsive">
+                <table class="table results-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Phone number</th>
+                            <th scope="col">NPA-NXX</th>
+                            <th scope="col">Rate center</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Results)
+                        {
+                            <tr>
+                                <td class="phone-cell">@item.Number</td>
+                                <td><span class="prefix-pill">@item.Prefix.Key</span></td>
+                                <td>
+                                    @if (item.HasRateCenter)
+                                    {
+                                        <span class="rate-center">
+                                            <span class="success-dot"></span>
+                                            @item.RateCenter
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="lookup-error">@item.ErrorMessage</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+}
