@@ -16,7 +16,7 @@ public static partial class PhoneNumberParser
     public static bool TryParse(string input, out ParsedPhoneNumber? parsed)
     {
         parsed = null;
-        if (string.IsNullOrWhiteSpace(input) || !AllowedCharacters().IsMatch(input))
+        if (string.IsNullOrWhiteSpace(input))
         {
             return false;
         }
@@ -40,11 +40,9 @@ public static partial class PhoneNumberParser
 
     public static bool ExceedsMaximumNumbers(int count) => count > MaximumNumbers;
 
-    [GeneratedRegex(@"[\r\n,;|]+")]
+    // Split on common separators: newline, comma, semicolon, pipe, slash, backslash, space, tab, and multiple of them
+    [GeneratedRegex(@"[\r\n,;|/\\\s]+")]
     private static partial Regex NumberSeparators();
-
-    [GeneratedRegex(@"^\+?[\d\s().-]+$")]
-    private static partial Regex AllowedCharacters();
 
     [GeneratedRegex(@"[^0-9]")]
     private static partial Regex NonDigits();

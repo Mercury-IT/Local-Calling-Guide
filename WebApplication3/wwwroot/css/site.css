@@ -157,14 +157,22 @@ h1, h2, h3, strong { font-family: inherit; }
     color: var(--ink);
 }
 
-.limit-badge, .result-count {
-    flex: none;
-    border-radius: 999px;
-    background: rgba(37, 99, 235, 0.1);
+.btn-export {
+    border: 1px solid var(--blue);
+    background: transparent;
     color: var(--blue);
-    font-size: 0.75rem;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
     font-weight: 600;
-    padding: 6px 12px;
+    cursor: pointer;
+    margin-left: 12px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-export:hover {
+    background: var(--blue);
+    color: white;
 }
 
 /* Form */
@@ -361,7 +369,7 @@ h1, h2, h3, strong { font-family: inherit; }
 .footer-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .footer-logo {
@@ -369,6 +377,17 @@ h1, h2, h3, strong { font-family: inherit; }
     height: 36px;
     border-radius: 8px;
     object-fit: contain;
+}
+
+.brand-mark {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(37, 99, 235, 0.1);
+    color: var(--blue);
+    flex-shrink: 0;
 }
 
 .footer-brand-text strong {

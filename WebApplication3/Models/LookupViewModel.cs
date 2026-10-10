@@ -9,18 +9,27 @@ public sealed class LookupViewModel
     [Display(Name = "Phone numbers or NPA-NXX prefixes")]
     public string Numbers { get; set; } = string.Empty;
 
-    public IReadOnlyList<RateCenterResult> Results { get; set; } = [];
+    public List<RateCenterResult> Results { get; set; } = [];
 }
 
-public sealed record PhonePrefix(string Npa, string Nxx)
+public sealed class PhonePrefix
 {
+    public string Npa { get; set; } = string.Empty;
+    public string Nxx { get; set; } = string.Empty;
     public string Key => $"{Npa}-{Nxx}";
+
+    public PhonePrefix() { }
+    public PhonePrefix(string npa, string nxx) { Npa = npa; Nxx = nxx; }
 }
 
 public sealed record ParsedPhoneNumber(string Original, PhonePrefix Prefix);
 
-public sealed record RateCenterResult(string Number, PhonePrefix Prefix, string? RateCenter, string? ErrorMessage)
+public sealed class RateCenterResult
 {
+    public string Number { get; set; } = string.Empty;
+    public PhonePrefix Prefix { get; set; } = new("", "");
+    public string? RateCenter { get; set; }
+    public string? ErrorMessage { get; set; }
     public bool HasRateCenter => !string.IsNullOrWhiteSpace(RateCenter) && ErrorMessage is null;
 }
 
