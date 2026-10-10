@@ -1,4 +1,4 @@
-# Local Calling Guide
+# Local Calling Guide https://www.rc.mercuryit.ca
 
 An ASP.NET Core MVC app that looks up the rate center for a 6-digit NPA-NXX or a North American phone number using the Local Calling Guide XML endpoint.
 
