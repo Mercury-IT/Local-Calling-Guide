@@ -421,7 +421,11 @@ h1, h2, h3, strong { font-family: inherit; }
     text-align: right;
 }
 
-.copyright { font-size: 0.75rem; opacity: 0.8; }
+.version {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    letter-spacing: 0.04em;
+}
 
 /* Responsive */
 @media (max-width: 640px) {
